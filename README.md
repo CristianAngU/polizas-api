@@ -66,7 +66,7 @@ Configuración en `application.yml` (se puede sobrescribir con variables de ento
 mvn test
 ```
 
-Incluye pruebas unitarias de las reglas de negocio (`PolizaServiceTest`) y pruebas de integración de los endpoints con MockMvc (`PolizaControllerIT`).
+Incluye pruebas unitarias de las reglas de negocio (`PolizaServiceTest`) y pruebas de integración de los endpoints con MockMvc (`PolizaControllerTest`).
 
 ## Seguridad
 

@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class PolizaControllerIT {
+class PolizaControllerTest {
 
     private static final String KEY = "x-api-key";
 

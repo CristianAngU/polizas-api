@@ -130,7 +130,7 @@ curl -X POST -H "x-api-key: 123456" -H "Content-Type: application/json" \
 
 | Código | Caso |
 |--------|------|
-| 400 | Datos inválidos en la petición o parámetro con valor no permitido |
+| 400 | Datos inválidos, JSON mal formado o parámetro con valor no permitido |
 | 401 | Header `x-api-key` ausente o incorrecto |
 | 404 | La póliza o el riesgo no existe |
 | 422 | Violación de una regla de negocio |

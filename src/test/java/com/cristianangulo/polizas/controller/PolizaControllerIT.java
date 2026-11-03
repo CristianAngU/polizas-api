@@ -90,6 +90,18 @@ class PolizaControllerIT {
     }
 
     @Test
+    void jsonMalFormadoRetorna400ConMensaje() throws Exception {
+        mvc.perform(post("/polizas/{id}/riesgos", colectivaId).header(KEY, "123456")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{esto no es json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.mensaje").value("El cuerpo de la petición no es un JSON válido"))
+                .andExpect(jsonPath("$.path").value("/polizas/" + colectivaId + "/riesgos"));
+    }
+
+    @Test
     void coreMockRegistraEvento() throws Exception {
         mvc.perform(post("/core-mock/evento").header(KEY, "123456")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -2,6 +2,7 @@ package com.cristianangulo.polizas.service;
 
 import com.cristianangulo.polizas.domain.*;
 import com.cristianangulo.polizas.dto.CrearRiesgoRequest;
+import com.cristianangulo.polizas.exception.RecursoNoEncontradoException;
 import com.cristianangulo.polizas.exception.ReglaNegocioException;
 import com.cristianangulo.polizas.integration.CoreClient;
 import com.cristianangulo.polizas.repository.PolizaRepository;
@@ -73,6 +74,42 @@ class PolizaServiceTest {
 
         assertThat(p.getEstado()).isEqualTo(EstadoPoliza.CANCELADA);
         assertThat(p.getRiesgos()).allMatch(Riesgo::estaCancelado);
+        verify(coreClient).notificarEvento("ACTUALIZACION", p.getId());
+    }
+
+    @Test
+    void cancelarRiesgoLoMarcaCanceladoYNotificaAlCore() {
+        Poliza p = poliza(TipoPoliza.INDIVIDUAL);
+        Riesgo riesgo = new Riesgo("Dir", "A");
+        p.agregarRiesgo(riesgo);
+        when(riesgoRepository.findById(5L)).thenReturn(Optional.of(riesgo));
+
+        Riesgo cancelado = service.cancelarRiesgo(5L);
+
+        assertThat(cancelado.estaCancelado()).isTrue();
+        verify(coreClient).notificarEvento("ACTUALIZACION", p.getId());
+    }
+
+    @Test
+    void noSePuedeCancelarUnRiesgoYaCancelado() {
+        Riesgo riesgo = new Riesgo("Dir", "A");
+        riesgo.cancelar();
+        when(riesgoRepository.findById(5L)).thenReturn(Optional.of(riesgo));
+
+        assertThatThrownBy(() -> service.cancelarRiesgo(5L))
+                .isInstanceOf(ReglaNegocioException.class)
+                .hasMessageContaining("cancelado");
+        verifyNoInteractions(coreClient);
+    }
+
+    @Test
+    void riesgoInexistenteLanzaNoEncontrado() {
+        when(riesgoRepository.findById(9L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.cancelarRiesgo(9L))
+                .isInstanceOf(RecursoNoEncontradoException.class)
+                .hasMessageContaining("9");
+        verifyNoInteractions(coreClient);
     }
 
     @Test

@@ -36,20 +36,47 @@ class PolizaControllerTest {
 
     Long individualId;
     Long colectivaId;
+    Long riesgoIndividualId;
 
     @BeforeEach
     void datos() {
         repo.deleteAll();
         Poliza ind = new Poliza("IND-T", TipoPoliza.INDIVIDUAL, "T", "B", LocalDate.of(2026, 1, 1), 12, new BigDecimal("1000000"));
-        ind.agregarRiesgo(new Riesgo("Dir", "A"));
+        Riesgo riesgo = new Riesgo("Dir", "A");
+        ind.agregarRiesgo(riesgo);
         Poliza col = new Poliza("COL-T", TipoPoliza.COLECTIVA, "T", "B", LocalDate.of(2026, 1, 1), 12, new BigDecimal("2000000"));
         individualId = repo.save(ind).getId();
+        riesgoIndividualId = riesgo.getId();
         colectivaId = repo.save(col).getId();
     }
 
     @Test
     void sinApiKeyRetorna401() throws Exception {
-        mvc.perform(get("/polizas")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/polizas"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.mensaje").value("Header x-api-key inválido o ausente"))
+                .andExpect(jsonPath("$.path").value("/polizas"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void polizaInexistenteRetorna404() throws Exception {
+        mvc.perform(get("/polizas/{id}/riesgos", 999).header(KEY, "123456"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.mensaje").value("No existe la póliza con id 999"))
+                .andExpect(jsonPath("$.path").value("/polizas/999/riesgos"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void cancelarRiesgoLoDejaCancelado() throws Exception {
+        mvc.perform(post("/riesgos/{id}/cancelar", riesgoIndividualId).header(KEY, "123456"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("CANCELADO"))
+                .andExpect(jsonPath("$.id").value(riesgoIndividualId));
     }
 
     @Test

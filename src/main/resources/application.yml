@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: polizas-api
+  datasource:
+    url: jdbc:h2:mem:polizasdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+
+app:
+  security:
+    api-key: ${API_KEY:123456}
+  negocio:
+    # Incremento del IPC aplicado en la renovación (ej. 0.0525 = 5.25 %)
+    ipc: ${IPC:0.0525}
+  core:
+    # URL del servicio de edición del CORE (en este reto apunta al mock local)
+    url: ${CORE_URL:http://localhost:8080/core-mock/evento}
